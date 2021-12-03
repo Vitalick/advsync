@@ -1,4 +1,4 @@
-package advSync
+package adv_sync
 
 import (
 	"errors"
