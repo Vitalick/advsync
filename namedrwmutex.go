@@ -1,4 +1,4 @@
-package adv_sync
+package advsync
 
 import "sync"
 

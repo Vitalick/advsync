@@ -1,13 +1,13 @@
-package adv_sync_test
+package advsync_test
 
 import (
 	"fmt"
-	adv_sync "github.com/vitalick/adv-sync"
+	advsync "github.com/vitalick/adv-sync"
 	"testing"
 	"time"
 )
 
-var sema = adv_sync.NewSemaphore(5)
+var sema = advsync.NewSemaphore(5)
 
 func PrintThread(c int) {
 	sema.Acquire()
