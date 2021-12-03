@@ -1,4 +1,7 @@
-# adv-sync
+# Advanched sync
+[![Go Report Card](https://goreportcard.com/badge/github.com/Vitalick/adv-sync)](https://goreportcard.com/report/github.com/Vitalick/adv-sync)
+[![GoDoc](https://godoc.org/github.com/Vitalick/adv-sync?status.svg)](https://godoc.org/github.com/Vitalick/adv-sync)
+
 Advanched sync package for Golang.
 
 ## NamedMutex
