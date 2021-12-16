@@ -1,3 +1,3 @@
-module github.com/Vitalick/adv-sync
+module github.com/vitalick/adv-sync
 
 go 1.17
