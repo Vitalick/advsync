@@ -24,11 +24,10 @@ func (nm *NamedRWMutex) Unlock(slug interface{}) {
 		nm.mapLock.Lock()
 		nm.internalMap[slug] = &sync.RWMutex{}
 		nm.internalMap[slug].Unlock()
-		locker = nm.internalMap[slug]
 		nm.mapLock.Unlock()
-	} else {
-		locker.Unlock()
+		return
 	}
+	locker.Unlock()
 }
 
 //Lock mutex by name
@@ -40,11 +39,10 @@ func (nm *NamedRWMutex) Lock(slug interface{}) {
 		nm.mapLock.Lock()
 		nm.internalMap[slug] = &sync.RWMutex{}
 		nm.internalMap[slug].Lock()
-		locker = nm.internalMap[slug]
 		nm.mapLock.Unlock()
-	} else {
-		locker.Lock()
+		return
 	}
+	locker.Lock()
 }
 
 //RUnlock mutex by name
@@ -56,11 +54,11 @@ func (nm *NamedRWMutex) RUnlock(slug interface{}) {
 		nm.mapLock.Lock()
 		nm.internalMap[slug] = &sync.RWMutex{}
 		nm.internalMap[slug].RUnlock()
-		locker = nm.internalMap[slug]
 		nm.mapLock.Unlock()
-	} else {
-		locker.Unlock()
+		return
 	}
+	locker.RUnlock()
+
 }
 
 //RLock mutex by name
@@ -72,9 +70,9 @@ func (nm *NamedRWMutex) RLock(slug interface{}) {
 		nm.mapLock.Lock()
 		nm.internalMap[slug] = &sync.RWMutex{}
 		nm.internalMap[slug].RLock()
-		locker = nm.internalMap[slug]
 		nm.mapLock.Unlock()
-	} else {
-		locker.Lock()
+		return
 	}
+	locker.RLock()
+
 }
