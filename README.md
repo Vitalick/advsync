@@ -18,3 +18,9 @@ It's a multiple read/write mutexes with lock, unlock, rw lock and rw unlock by n
 
 ## Semaphore
 It's semaphore primitive based by `sync.Cond`.
+
+## NamedSemaphore
+It's a multiple semaphores with acquiries and releases by name implemented as `interface{}`. Uses `sync.RWMutex+map`.
+
+## NamedSemaphoreSM
+It's a multiple mutexes with acquiries and releases by name implemented as `interface{}`. Uses `sync.Map`.
