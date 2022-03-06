@@ -24,7 +24,7 @@ func (nm *NamedMutexSM) UnlockSafe(slug interface{}) bool {
 	if !vb {
 		return false
 	}
-	v2.(*sync.RWMutex).Unlock()
+	v2.(*sync.Mutex).Unlock()
 	return true
 }
 
