@@ -18,7 +18,7 @@ func (nm *NamedMutexSM) Unlock(slug interface{}) {
 
 //UnlockSafe mutex by name
 func (nm *NamedMutexSM) UnlockSafe(slug interface{}) bool {
-	v2, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
+	v2, _ := nm.internalMap.LoadOrStore(slug, &sync.Mutex{})
 	state := reflect.ValueOf(v2).Elem().FieldByName("state")
 	vb := state.Int()&mutexLocked == mutexLocked
 	if !vb {
