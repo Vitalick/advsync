@@ -6,14 +6,15 @@ import (
 
 // NamedSemaphoreChanSM is a named semaphore via sync.Map
 type NamedSemaphoreChanSM[K comparable] struct {
-	internalMap xsync.MapOf[K, *SemaphoreChan]
+	internalMap *xsync.MapOf[K, *SemaphoreChan]
 	maxCount    uint
 }
 
 // NewNamedSemaphoreChanSM create new named read/write mutex
 func NewNamedSemaphoreChanSM[K comparable](maxCount uint) *NamedSemaphoreChanSM[K] {
 	return &NamedSemaphoreChanSM[K]{
-		maxCount: maxCount,
+		maxCount:    maxCount,
+		internalMap: xsync.NewMapOf[K, *SemaphoreChan](),
 	}
 }
 

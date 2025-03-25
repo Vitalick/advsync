@@ -7,7 +7,13 @@ import (
 
 // NamedRWMutexSM is a named read/write mutex via sync.Map
 type NamedRWMutexSM[K comparable] struct {
-	internalMap xsync.MapOf[K, *sync.RWMutex]
+	internalMap *xsync.MapOf[K, *sync.RWMutex]
+}
+
+func NewNamedRWMutexSM[K comparable]() NamedRWMutexSM[K] {
+	return NamedRWMutexSM[K]{
+		xsync.NewMapOf[K, *sync.RWMutex](),
+	}
 }
 
 // Unlock mutex by name

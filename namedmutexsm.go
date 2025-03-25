@@ -7,7 +7,13 @@ import (
 
 // NamedMutexSM is a named mutex via sync.Map
 type NamedMutexSM[K comparable] struct {
-	internalMap xsync.MapOf[K, *sync.Mutex]
+	internalMap *xsync.MapOf[K, *sync.Mutex]
+}
+
+func NewNamedMutexSM[K comparable]() NamedMutexSM[K] {
+	return NamedMutexSM[K]{
+		xsync.NewMapOf[K, *sync.Mutex](),
+	}
 }
 
 // Unlock mutex by name
