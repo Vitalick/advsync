@@ -1,59 +1,47 @@
 package advsync
 
 import (
-	"reflect"
+	"github.com/puzpuzpuz/xsync/v3"
 	"sync"
 )
 
-//NamedRWMutexSM is a named read/write mutex via sync.Map
-type NamedRWMutexSM struct {
-	internalMap sync.Map
+// NamedRWMutexSM is a named read/write mutex via sync.Map
+type NamedRWMutexSM[K comparable] struct {
+	internalMap xsync.MapOf[K, *sync.RWMutex]
 }
 
-//Unlock mutex by name
-func (nm *NamedRWMutexSM) Unlock(slug interface{}) {
-	v2, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
-	v2.(*sync.RWMutex).Unlock()
+// Unlock mutex by name
+func (nm *NamedRWMutexSM[K]) Unlock(slug K) {
+	mutex, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
+	mutex.Unlock()
 }
 
-//UnlockSafe mutex by name
-func (nm *NamedRWMutexSM) UnlockSafe(slug interface{}) bool {
-	v2, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
-	state := reflect.ValueOf(v2).Elem().FieldByName("w").FieldByName("state")
-	vb := state.Int()&mutexLocked == mutexLocked
-	if !vb {
-		return false
-	}
-	v2.(*sync.RWMutex).Unlock()
-	return true
+// UnlockSafe mutex by name
+func (nm *NamedRWMutexSM[K]) UnlockSafe(slug K) bool {
+	mutex, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
+	return unlockSafeRW(mutex)
 }
 
-//Lock mutex by name
-func (nm *NamedRWMutexSM) Lock(slug interface{}) {
-	v2, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
-	v2.(*sync.RWMutex).Lock()
+// Lock mutex by name
+func (nm *NamedRWMutexSM[K]) Lock(slug K) {
+	mutex, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
+	mutex.Lock()
 }
 
-//RUnlock mutex by name
-func (nm *NamedRWMutexSM) RUnlock(slug interface{}) {
-	v2, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
-	v2.(*sync.RWMutex).RUnlock()
+// RUnlock mutex by name
+func (nm *NamedRWMutexSM[K]) RUnlock(slug K) {
+	mutex, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
+	mutex.RUnlock()
 }
 
-//RUnlockSafe mutex by name
-func (nm *NamedRWMutexSM) RUnlockSafe(slug interface{}) bool {
-	v2, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
-	state := reflect.ValueOf(v2).Elem().FieldByName("readerCount")
-	vb := state.Int() > 0
-	if !vb {
-		return false
-	}
-	v2.(*sync.RWMutex).Unlock()
-	return true
+// RUnlockSafe mutex by name
+func (nm *NamedRWMutexSM[K]) RUnlockSafe(slug K) bool {
+	mutex, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
+	return rUnlockSafeRW(mutex)
 }
 
-//RLock mutex by name
-func (nm *NamedRWMutexSM) RLock(slug interface{}) {
-	v2, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
-	v2.(*sync.RWMutex).RLock()
+// RLock mutex by name
+func (nm *NamedRWMutexSM[K]) RLock(slug K) {
+	mutex, _ := nm.internalMap.LoadOrStore(slug, &sync.RWMutex{})
+	mutex.RLock()
 }

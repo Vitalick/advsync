@@ -1,27 +1,26 @@
 package advsync
 
 import (
-	"reflect"
 	"sync"
 )
 
-//NamedRWMutex is a named read/write mutex via sync.RWMutex
-type NamedRWMutex struct {
+// NamedRWMutex is a named read/write mutex via sync.RWMutex
+type NamedRWMutex[K comparable] struct {
 	mapLock     sync.RWMutex
-	internalMap map[interface{}]*sync.RWMutex
+	internalMap map[K]*sync.RWMutex
 }
 
-//NewNamedRWMutex create new named read/write mutex
-func NewNamedRWMutex() *NamedRWMutex {
-	return &NamedRWMutex{
-		internalMap: map[interface{}]*sync.RWMutex{},
+// NewNamedRWMutex create new named read/write mutex
+func NewNamedRWMutex[K comparable]() *NamedRWMutex[K] {
+	return &NamedRWMutex[K]{
+		internalMap: map[K]*sync.RWMutex{},
 	}
 }
 
-//Unlock mutex by name
-func (nm *NamedRWMutex) Unlock(slug interface{}) {
+// Unlock mutex by name
+func (nm *NamedRWMutex[K]) Unlock(slug K) {
 	nm.mapLock.RLock()
-	locker, ok := nm.internalMap[slug]
+	mutex, ok := nm.internalMap[slug]
 	nm.mapLock.RUnlock()
 	if !ok {
 		nm.mapLock.Lock()
@@ -30,30 +29,24 @@ func (nm *NamedRWMutex) Unlock(slug interface{}) {
 		nm.mapLock.Unlock()
 		return
 	}
-	locker.Unlock()
+	mutex.Unlock()
 }
 
-//UnlockSafe mutex by name
-func (nm *NamedRWMutex) UnlockSafe(slug interface{}) bool {
+// UnlockSafe mutex by name
+func (nm *NamedRWMutex[K]) UnlockSafe(slug K) bool {
 	nm.mapLock.RLock()
-	locker, ok := nm.internalMap[slug]
+	mutex, ok := nm.internalMap[slug]
 	nm.mapLock.RUnlock()
 	if !ok {
 		return false
 	}
-	state := reflect.ValueOf(locker).Elem().FieldByName("w").FieldByName("state")
-	vb := state.Int()&mutexLocked == mutexLocked
-	if !vb {
-		return false
-	}
-	locker.Unlock()
-	return true
+	return unlockSafeRW(mutex)
 }
 
-//Lock mutex by name
-func (nm *NamedRWMutex) Lock(slug interface{}) {
+// Lock mutex by name
+func (nm *NamedRWMutex[K]) Lock(slug K) {
 	nm.mapLock.RLock()
-	locker, ok := nm.internalMap[slug]
+	mutex, ok := nm.internalMap[slug]
 	nm.mapLock.RUnlock()
 	if !ok {
 		nm.mapLock.Lock()
@@ -62,13 +55,13 @@ func (nm *NamedRWMutex) Lock(slug interface{}) {
 		nm.mapLock.Unlock()
 		return
 	}
-	locker.Lock()
+	mutex.Lock()
 }
 
-//RUnlock mutex by name
-func (nm *NamedRWMutex) RUnlock(slug interface{}) {
+// RUnlock mutex by name
+func (nm *NamedRWMutex[K]) RUnlock(slug K) {
 	nm.mapLock.RLock()
-	locker, ok := nm.internalMap[slug]
+	mutex, ok := nm.internalMap[slug]
 	nm.mapLock.RUnlock()
 	if !ok {
 		nm.mapLock.Lock()
@@ -77,31 +70,25 @@ func (nm *NamedRWMutex) RUnlock(slug interface{}) {
 		nm.mapLock.Unlock()
 		return
 	}
-	locker.RUnlock()
+	mutex.RUnlock()
 
 }
 
-//RUnlockSafe mutex by name
-func (nm *NamedRWMutex) RUnlockSafe(slug interface{}) bool {
+// RUnlockSafe mutex by name
+func (nm *NamedRWMutex[K]) RUnlockSafe(slug K) bool {
 	nm.mapLock.RLock()
-	locker, ok := nm.internalMap[slug]
+	mutex, ok := nm.internalMap[slug]
 	nm.mapLock.RUnlock()
 	if !ok {
 		return false
 	}
-	state := reflect.ValueOf(locker).Elem().FieldByName("readerCount")
-	vb := state.Int() > 0
-	if !vb {
-		return false
-	}
-	locker.RUnlock()
-	return true
+	return rUnlockSafeRW(mutex)
 }
 
-//RLock mutex by name
-func (nm *NamedRWMutex) RLock(slug interface{}) {
+// RLock mutex by name
+func (nm *NamedRWMutex[K]) RLock(slug K) {
 	nm.mapLock.RLock()
-	locker, ok := nm.internalMap[slug]
+	mutex, ok := nm.internalMap[slug]
 	nm.mapLock.RUnlock()
 	if !ok {
 		nm.mapLock.Lock()
@@ -110,6 +97,6 @@ func (nm *NamedRWMutex) RLock(slug interface{}) {
 		nm.mapLock.Unlock()
 		return
 	}
-	locker.RLock()
+	mutex.RLock()
 
 }

@@ -1,28 +1,30 @@
 package advsync
 
-import "sync"
+import (
+	"github.com/puzpuzpuz/xsync/v3"
+)
 
-//NamedSemaphoreSM is a named semaphore via sync.Map
-type NamedSemaphoreSM struct {
-	internalMap sync.Map
+// NamedSemaphoreSM is a named semaphore via sync.Map
+type NamedSemaphoreSM[K comparable] struct {
+	internalMap xsync.MapOf[K, *Semaphore]
 	maxCount    uint
 }
 
-//NewNamedSemaphoreSM create new named read/write mutex
-func NewNamedSemaphoreSM(maxCount uint) *NamedSemaphoreSM {
-	return &NamedSemaphoreSM{
+// NewNamedSemaphoreSM create new named read/write mutex
+func NewNamedSemaphoreSM[K comparable](maxCount uint) *NamedSemaphoreSM[K] {
+	return &NamedSemaphoreSM[K]{
 		maxCount: maxCount,
 	}
 }
 
-//Release semaphore by name
-func (nm *NamedSemaphoreSM) Release(slug interface{}) error {
+// Release semaphore by name
+func (nm *NamedSemaphoreSM[K]) Release(slug K) error {
 	v2, _ := nm.internalMap.LoadOrStore(slug, NewSemaphore(nm.maxCount))
-	return v2.(*Semaphore).Release()
+	return v2.Release()
 }
 
-//Acquire semaphore by name
-func (nm *NamedSemaphoreSM) Acquire(slug interface{}) {
+// Acquire semaphore by name
+func (nm *NamedSemaphoreSM[K]) Acquire(slug interface{}) {
 	v2, _ := nm.internalMap.LoadOrStore(slug, NewSemaphore(nm.maxCount))
-	v2.(*Semaphore).Acquire()
+	v2.Acquire()
 }

@@ -2,23 +2,23 @@ package advsync
 
 import "sync"
 
-//NamedSemaphore is a named semaphore via sync.RWMutex
-type NamedSemaphore struct {
+// NamedSemaphore is a named semaphore via sync.RWMutex
+type NamedSemaphore[K comparable] struct {
 	mapLock     sync.RWMutex
 	maxCount    uint
-	internalMap map[interface{}]*Semaphore
+	internalMap map[K]*Semaphore
 }
 
-//NewNamedSemaphore create new named semaphore
-func NewNamedSemaphore(maxCount uint) *NamedSemaphore {
-	return &NamedSemaphore{
-		internalMap: map[interface{}]*Semaphore{},
+// NewNamedSemaphore create new named semaphore
+func NewNamedSemaphore[K comparable](maxCount uint) *NamedSemaphore[K] {
+	return &NamedSemaphore[K]{
+		internalMap: map[K]*Semaphore{},
 		maxCount:    maxCount,
 	}
 }
 
-//Release semaphore by name
-func (nm *NamedSemaphore) Release(slug interface{}) error {
+// Release semaphore by name
+func (nm *NamedSemaphore[K]) Release(slug K) error {
 	nm.mapLock.RLock()
 	locker, ok := nm.internalMap[slug]
 	nm.mapLock.RUnlock()
@@ -32,8 +32,8 @@ func (nm *NamedSemaphore) Release(slug interface{}) error {
 	return locker.Release()
 }
 
-//Acquire semaphore by name
-func (nm *NamedSemaphore) Acquire(slug interface{}) {
+// Acquire semaphore by name
+func (nm *NamedSemaphore[K]) Acquire(slug K) {
 	nm.mapLock.RLock()
 	locker, ok := nm.internalMap[slug]
 	nm.mapLock.RUnlock()
