@@ -24,7 +24,7 @@ func (nm *NamedSemaphoreSM[K]) Release(slug K) error {
 }
 
 // Acquire semaphore by name
-func (nm *NamedSemaphoreSM[K]) Acquire(slug interface{}) {
+func (nm *NamedSemaphoreSM[K]) Acquire(slug K) {
 	v2, _ := nm.internalMap.LoadOrStore(slug, NewSemaphore(nm.maxCount))
 	v2.Acquire()
 }
