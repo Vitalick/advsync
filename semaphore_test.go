@@ -2,9 +2,10 @@ package advsync_test
 
 import (
 	"fmt"
-	advsync "github.com/vitalick/adv-sync"
 	"testing"
 	"time"
+
+	advsync "github.com/vitalick/adv-sync"
 )
 
 var sema = advsync.NewSemaphore(5)
