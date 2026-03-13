@@ -1,4 +1,4 @@
-module github.com/vitalick/adv-sync
+module github.com/vitalick/advsync
 
 go 1.20
 
