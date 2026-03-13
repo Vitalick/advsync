@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	advsync "github.com/vitalick/adv-sync"
+	"github.com/vitalick/advsync"
 )
 
 var sema = advsync.NewSemaphore(5)

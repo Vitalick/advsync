@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	advsync "github.com/vitalick/adv-sync"
+	"github.com/vitalick/advsync"
 )
 
 // minimal interface for NamedMutex-like types
