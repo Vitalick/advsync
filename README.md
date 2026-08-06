@@ -1,8 +1,8 @@
 # advsync
 
-[![CI](https://github.com/vitalick/advsync/actions/workflows/ci.yml/badge.svg)](https://github.com/vitalick/advsync/actions/workflows/ci.yml)
+[![tests](https://github.com/vitalick/advsync/actions/workflows/test.yml/badge.svg)](https://github.com/vitalick/advsync/actions/workflows/test.yml)
+[![golangci-lint](https://github.com/vitalick/advsync/actions/workflows/lint.yml/badge.svg)](https://github.com/vitalick/advsync/actions/workflows/lint.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/vitalick/advsync.svg)](https://pkg.go.dev/github.com/vitalick/advsync)
-[![Go Report Card](https://goreportcard.com/badge/github.com/vitalick/advsync)](https://goreportcard.com/report/github.com/vitalick/advsync)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/vitalick/advsync)](go.mod)
 [![License](https://img.shields.io/badge/license-GPL--2.0--only-blue.svg)](LICENSE)
 
