@@ -1,29 +1,40 @@
 package advsync_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
 	"github.com/vitalick/advsync"
 )
 
-var sema = advsync.NewSemaphore(5)
+func TestSemaphoreAcquireBlocksAtCapacity(t *testing.T) {
+	semaphore := advsync.NewSemaphore(1)
+	semaphore.Acquire()
 
-func PrintThread(c int) {
-	sema.Acquire()
-	for range make([]struct{}, 5) {
-		fmt.Println(c)
-		time.Sleep(time.Millisecond * 500)
+	acquired := make(chan struct{})
+	go func() {
+		semaphore.Acquire()
+		close(acquired)
+	}()
+
+	select {
+	case <-acquired:
+		t.Fatal("acquire succeeded while the semaphore was at capacity")
+	case <-time.After(50 * time.Millisecond):
 	}
-	if err := sema.Release(); err != nil {
-		panic(err)
+
+	require.NoError(t, semaphore.Release())
+	select {
+	case <-acquired:
+	case <-time.After(time.Second):
+		t.Fatal("acquire did not continue after release")
 	}
+	require.NoError(t, semaphore.Release())
 }
 
-func TestSemaphore_Semaphore(t *testing.T) {
-	for i := range make([]struct{}, 10) {
-		go PrintThread(i)
-	}
-	time.Sleep(time.Second * 10)
+func TestSemaphoreReleaseWithoutAcquireReturnsError(t *testing.T) {
+	semaphore := advsync.NewSemaphore(1)
+
+	require.Error(t, semaphore.Release())
 }

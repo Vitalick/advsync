@@ -1,58 +1,91 @@
 package advsync_test
 
 import (
-	"runtime"
-	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/vitalick/advsync"
 )
 
-// minimal interface for NamedMutex-like types
-// it is satisfied by *advsync.NamedMutex[K] and *advsync.NamedMutexSM[K]
-// and represents just Lock/Unlock by key
-// Keeping it here avoids changing the library's public API.
-type namedLocker[K comparable] interface {
-	Lock(K)
-	Unlock(K)
+type namedMutex interface {
+	Lock(string)
+	Unlock(string)
+	UnlockSafe(string) bool
 }
 
-// shared test logic to verify that locking the same key serializes access
-func runSameKeyNoRace[K comparable](t *testing.T, name string, nl namedLocker[K], key K) {
-	t.Helper()
+func TestNamedMutexUnlockSafe(t *testing.T) {
+	t.Parallel()
 
-	n := 20000
-	var wg sync.WaitGroup
-	wg.Add(n)
-
-	counter := 0
-	for i := 0; i < n; i++ {
-		go func() {
-			defer wg.Done()
-			nl.Lock(key)
-			// Simulate some work and encourage scheduler switches
-			tmp := counter
-			runtime.Gosched()
-			tmp++
-			counter = tmp
-			nl.Unlock(key)
-		}()
+	tests := map[string]namedMutex{
+		"map":       advsync.NewNamedMutex[string](),
+		"xsync.Map": func() namedMutex { mutex := advsync.NewNamedMutexSM[string](); return &mutex }(),
 	}
-	wg.Wait()
 
-	require.Equal(t, n, counter, "%s: all increments must be observed under the same key lock", name)
+	for name, mutex := range tests {
+		t.Run(name, func(t *testing.T) {
+			require.False(t, mutex.UnlockSafe("key"))
+			mutex.Lock("key")
+			require.True(t, mutex.UnlockSafe("key"))
+		})
+	}
 }
 
-func TestNamedMutexes_SameKey_NoRace(t *testing.T) {
-	// map+RWMutex implementation
-	{
-		nm := advsync.NewNamedMutex[string]() // returns *NamedMutex[string]
-		runSameKeyNoRace[string](t, "NamedMutex", nm, "k")
+func TestNamedMutexDifferentKeysDoNotBlock(t *testing.T) {
+	tests := map[string]namedMutex{
+		"map":       advsync.NewNamedMutex[string](),
+		"xsync.Map": func() namedMutex { mutex := advsync.NewNamedMutexSM[string](); return &mutex }(),
 	}
-	// xsync.Map-based implementation
-	{
-		nmSM := advsync.NewNamedMutexSM[string]()               // returns NamedMutexSM[string] (value)
-		runSameKeyNoRace[string](t, "NamedMutexSM", &nmSM, "k") // pass pointer to match interface
+
+	for name, mutex := range tests {
+		t.Run(name, func(t *testing.T) {
+			mutex.Lock("first")
+			defer mutex.Unlock("first")
+
+			acquired := make(chan struct{})
+			go func() {
+				mutex.Lock("second")
+				defer mutex.Unlock("second")
+				close(acquired)
+			}()
+
+			select {
+			case <-acquired:
+			case <-time.After(time.Second):
+				t.Fatal("a different key remained blocked")
+			}
+		})
+	}
+}
+
+func TestNamedMutexSameKeyBlocks(t *testing.T) {
+	tests := map[string]namedMutex{
+		"map":       advsync.NewNamedMutex[string](),
+		"xsync.Map": func() namedMutex { mutex := advsync.NewNamedMutexSM[string](); return &mutex }(),
+	}
+
+	for name, mutex := range tests {
+		t.Run(name, func(t *testing.T) {
+			mutex.Lock("key")
+			acquired := make(chan struct{})
+			go func() {
+				mutex.Lock("key")
+				close(acquired)
+				mutex.Unlock("key")
+			}()
+
+			select {
+			case <-acquired:
+				t.Fatal("the same key acquired a locked mutex")
+			case <-time.After(50 * time.Millisecond):
+			}
+
+			mutex.Unlock("key")
+			select {
+			case <-acquired:
+			case <-time.After(time.Second):
+				t.Fatal("the same key did not acquire after unlock")
+			}
+		})
 	}
 }

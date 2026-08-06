@@ -41,6 +41,12 @@ func unlockSafeRW(mutexRW *sync.RWMutex) bool {
 
 func rUnlockSafeRW(mutexRW *sync.RWMutex) bool {
 	state := reflect.ValueOf(mutexRW).Elem().FieldByName("readerCount")
+	if state.Kind() == reflect.Struct {
+		state = state.FieldByName("v")
+	}
+	if !state.IsValid() || state.Kind() != reflect.Int32 {
+		return false
+	}
 	vb := state.Int() > 0
 	if !vb {
 		return false
