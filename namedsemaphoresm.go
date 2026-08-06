@@ -1,12 +1,12 @@
 package advsync
 
 import (
-	"github.com/puzpuzpuz/xsync/v3"
+	"github.com/puzpuzpuz/xsync/v4"
 )
 
 // NamedSemaphoreSM is a named semaphore via sync.Map
 type NamedSemaphoreSM[K comparable] struct {
-	internalMap *xsync.MapOf[K, *Semaphore]
+	internalMap *xsync.Map[K, *Semaphore]
 	maxCount    uint
 }
 
@@ -14,7 +14,7 @@ type NamedSemaphoreSM[K comparable] struct {
 func NewNamedSemaphoreSM[K comparable](maxCount uint) *NamedSemaphoreSM[K] {
 	return &NamedSemaphoreSM[K]{
 		maxCount:    maxCount,
-		internalMap: xsync.NewMapOf[K, *Semaphore](),
+		internalMap: xsync.NewMap[K, *Semaphore](),
 	}
 }
 

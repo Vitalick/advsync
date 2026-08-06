@@ -1,18 +1,19 @@
 package advsync
 
 import (
-	"github.com/puzpuzpuz/xsync/v3"
 	"sync"
+
+	"github.com/puzpuzpuz/xsync/v4"
 )
 
 // NamedRWMutexSM is a named read/write mutex via sync.Map
 type NamedRWMutexSM[K comparable] struct {
-	internalMap *xsync.MapOf[K, *sync.RWMutex]
+	internalMap *xsync.Map[K, *sync.RWMutex]
 }
 
 func NewNamedRWMutexSM[K comparable]() NamedRWMutexSM[K] {
 	return NamedRWMutexSM[K]{
-		xsync.NewMapOf[K, *sync.RWMutex](),
+		xsync.NewMap[K, *sync.RWMutex](),
 	}
 }
 

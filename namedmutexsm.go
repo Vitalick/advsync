@@ -1,18 +1,19 @@
 package advsync
 
 import (
-	"github.com/puzpuzpuz/xsync/v3"
 	"sync"
+
+	"github.com/puzpuzpuz/xsync/v4"
 )
 
 // NamedMutexSM is a named mutex via sync.Map
 type NamedMutexSM[K comparable] struct {
-	internalMap *xsync.MapOf[K, *sync.Mutex]
+	internalMap *xsync.Map[K, *sync.Mutex]
 }
 
 func NewNamedMutexSM[K comparable]() NamedMutexSM[K] {
 	return NamedMutexSM[K]{
-		xsync.NewMapOf[K, *sync.Mutex](),
+		xsync.NewMap[K, *sync.Mutex](),
 	}
 }
 
