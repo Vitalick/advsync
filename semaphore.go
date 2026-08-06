@@ -5,14 +5,17 @@ import (
 	"sync"
 )
 
-//Semaphore is a semaphore primitive based on sync.Cond
+// Semaphore is a counting semaphore implemented with sync.Cond.
 type Semaphore struct {
 	cond     *sync.Cond
 	counter  uint
 	maxCount uint
 }
 
-//NewSemaphore return new Semaphore with max count of acquiries
+// NewSemaphore creates a Semaphore with at most maxCount concurrent acquisitions.
+//
+// Parameters:
+//   - maxCount: maximum number of acquired permits.
 func NewSemaphore(maxCount uint) *Semaphore {
 	cond := sync.NewCond(&sync.Mutex{})
 	return &Semaphore{
@@ -21,7 +24,7 @@ func NewSemaphore(maxCount uint) *Semaphore {
 	}
 }
 
-//Acquire waiting until counter bigger than max count
+// Acquire waits until a permit is available and then acquires it.
 func (s *Semaphore) Acquire() {
 	s.cond.L.Lock()
 	if s.counter >= s.maxCount {
@@ -31,7 +34,10 @@ func (s *Semaphore) Acquire() {
 	s.cond.L.Unlock()
 }
 
-//Release decrease counter until counter bigger than 0
+// Release releases one acquired permit.
+//
+// Returns:
+//   - error: an error when there is no acquisition to release.
 func (s *Semaphore) Release() error {
 	s.cond.L.Lock()
 	if s.counter < 1 {

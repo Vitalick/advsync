@@ -4,20 +4,23 @@ import (
 	"sync"
 )
 
-// NamedRWMutex is a named read/write mutex via sync.RWMutex
+// NamedRWMutex provides an independent read/write mutex for each key.
 type NamedRWMutex[K comparable] struct {
 	mapLock     sync.RWMutex
 	internalMap map[K]*sync.RWMutex
 }
 
-// NewNamedRWMutex create new named read/write mutex
+// NewNamedRWMutex creates an empty keyed read/write mutex collection.
 func NewNamedRWMutex[K comparable]() *NamedRWMutex[K] {
 	return &NamedRWMutex[K]{
 		internalMap: map[K]*sync.RWMutex{},
 	}
 }
 
-// Unlock mutex by name
+// Unlock releases the write lock associated with slug.
+//
+// Parameters:
+//   - slug: key identifying the read/write mutex to release.
 func (nm *NamedRWMutex[K]) Unlock(slug K) {
 	nm.mapLock.RLock()
 	mutex, ok := nm.internalMap[slug]
@@ -32,7 +35,13 @@ func (nm *NamedRWMutex[K]) Unlock(slug K) {
 	mutex.Unlock()
 }
 
-// UnlockSafe mutex by name
+// UnlockSafe releases the write lock associated with slug when it appears locked.
+//
+// Parameters:
+//   - slug: key identifying the read/write mutex to release.
+//
+// Returns:
+//   - bool: true when the write lock was released; false when it was not locked.
 func (nm *NamedRWMutex[K]) UnlockSafe(slug K) bool {
 	nm.mapLock.RLock()
 	mutex, ok := nm.internalMap[slug]
@@ -43,7 +52,10 @@ func (nm *NamedRWMutex[K]) UnlockSafe(slug K) bool {
 	return unlockSafeRW(mutex)
 }
 
-// Lock mutex by name
+// Lock acquires the write lock associated with slug.
+//
+// Parameters:
+//   - slug: key identifying the read/write mutex to acquire.
 func (nm *NamedRWMutex[K]) Lock(slug K) {
 	nm.mapLock.RLock()
 	mutex, ok := nm.internalMap[slug]
@@ -58,7 +70,10 @@ func (nm *NamedRWMutex[K]) Lock(slug K) {
 	mutex.Lock()
 }
 
-// RUnlock mutex by name
+// RUnlock releases a read lock associated with slug.
+//
+// Parameters:
+//   - slug: key identifying the read/write mutex to release.
 func (nm *NamedRWMutex[K]) RUnlock(slug K) {
 	nm.mapLock.RLock()
 	mutex, ok := nm.internalMap[slug]
@@ -74,7 +89,13 @@ func (nm *NamedRWMutex[K]) RUnlock(slug K) {
 
 }
 
-// RUnlockSafe mutex by name
+// RUnlockSafe releases a read lock associated with slug when one is held.
+//
+// Parameters:
+//   - slug: key identifying the read/write mutex to release.
+//
+// Returns:
+//   - bool: true when a read lock was released; false when no reader was present.
 func (nm *NamedRWMutex[K]) RUnlockSafe(slug K) bool {
 	nm.mapLock.RLock()
 	mutex, ok := nm.internalMap[slug]
@@ -85,7 +106,10 @@ func (nm *NamedRWMutex[K]) RUnlockSafe(slug K) bool {
 	return rUnlockSafeRW(mutex)
 }
 
-// RLock mutex by name
+// RLock acquires a read lock associated with slug.
+//
+// Parameters:
+//   - slug: key identifying the read/write mutex to acquire.
 func (nm *NamedRWMutex[K]) RLock(slug K) {
 	nm.mapLock.RLock()
 	mutex, ok := nm.internalMap[slug]

@@ -2,14 +2,17 @@ package advsync
 
 import "sync"
 
-// NamedSemaphoreChan is a named semaphore via sync.RWMutex
+// NamedSemaphoreChan provides an independent channel-based semaphore for each key.
 type NamedSemaphoreChan[K comparable] struct {
 	mapLock     sync.RWMutex
 	maxCount    uint
 	internalMap map[K]*SemaphoreChan
 }
 
-// NewNamedSemaphoreChan create new named semaphore
+// NewNamedSemaphoreChan creates a keyed channel-based semaphore collection.
+//
+// Parameters:
+//   - maxCount: maximum simultaneous acquisitions for each key.
 func NewNamedSemaphoreChan[K comparable](maxCount uint) *NamedSemaphoreChan[K] {
 	return &NamedSemaphoreChan[K]{
 		internalMap: map[K]*SemaphoreChan{},
@@ -17,7 +20,10 @@ func NewNamedSemaphoreChan[K comparable](maxCount uint) *NamedSemaphoreChan[K] {
 	}
 }
 
-// Release semaphore by name
+// Release releases one acquisition for the channel-based semaphore associated with slug.
+//
+// Parameters:
+//   - slug: key identifying the semaphore to release.
 func (nm *NamedSemaphoreChan[K]) Release(slug K) {
 	nm.mapLock.RLock()
 	locker, ok := nm.internalMap[slug]
@@ -32,7 +38,10 @@ func (nm *NamedSemaphoreChan[K]) Release(slug K) {
 	locker.Release()
 }
 
-// Acquire semaphore by name
+// Acquire waits for and acquires a permit from the semaphore associated with slug.
+//
+// Parameters:
+//   - slug: key identifying the semaphore to acquire.
 func (nm *NamedSemaphoreChan[K]) Acquire(slug K) {
 	nm.mapLock.RLock()
 	locker, ok := nm.internalMap[slug]

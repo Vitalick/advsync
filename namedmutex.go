@@ -4,20 +4,23 @@ import (
 	"sync"
 )
 
-// NamedMutex is a named mutex via sync.RWMutex
+// NamedMutex provides an independent mutex for each key.
 type NamedMutex[K comparable] struct {
 	mapLock     sync.RWMutex
 	internalMap map[K]*sync.Mutex
 }
 
-// NewNamedMutex create new named mutex
+// NewNamedMutex creates an empty keyed mutex collection.
 func NewNamedMutex[K comparable]() *NamedMutex[K] {
 	return &NamedMutex[K]{
 		internalMap: map[K]*sync.Mutex{},
 	}
 }
 
-// Unlock mutex by name
+// Unlock releases the mutex associated with slug.
+//
+// Parameters:
+//   - slug: key identifying the mutex to release.
 func (nm *NamedMutex[K]) Unlock(slug K) {
 	nm.mapLock.RLock()
 	mutex, ok := nm.internalMap[slug]
@@ -32,7 +35,13 @@ func (nm *NamedMutex[K]) Unlock(slug K) {
 	mutex.Unlock()
 }
 
-// UnlockSafe mutex by name
+// UnlockSafe releases the mutex associated with slug when it appears locked.
+//
+// Parameters:
+//   - slug: key identifying the mutex to release.
+//
+// Returns:
+//   - bool: true when the mutex was released; false when it was not locked.
 func (nm *NamedMutex[K]) UnlockSafe(slug K) bool {
 	nm.mapLock.RLock()
 	mutex, ok := nm.internalMap[slug]
@@ -43,7 +52,10 @@ func (nm *NamedMutex[K]) UnlockSafe(slug K) bool {
 	return unlockSafe(mutex)
 }
 
-// Lock mutex by name
+// Lock acquires the mutex associated with slug.
+//
+// Parameters:
+//   - slug: key identifying the mutex to acquire.
 func (nm *NamedMutex[K]) Lock(slug K) {
 	nm.mapLock.RLock()
 	mutex, ok := nm.internalMap[slug]

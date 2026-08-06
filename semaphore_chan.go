@@ -1,11 +1,14 @@
 package advsync
 
-// SemaphoreChan is a semaphore primitive based on chan
+// SemaphoreChan is a counting semaphore implemented with a channel.
 type SemaphoreChan struct {
 	ch chan struct{}
 }
 
-// NewSemaphoreChan return new Semaphore with max count of acquiries
+// NewSemaphoreChan creates a SemaphoreChan with at most maxCount concurrent acquisitions.
+//
+// Parameters:
+//   - maxCount: maximum number of acquired permits.
 func NewSemaphoreChan(maxCount uint) *SemaphoreChan {
 	if maxCount == 0 {
 		return &SemaphoreChan{
@@ -17,16 +20,20 @@ func NewSemaphoreChan(maxCount uint) *SemaphoreChan {
 	}
 }
 
-// Acquire waiting until counter bigger than max count
+// Acquire waits until a permit is available and then acquires it.
 func (s *SemaphoreChan) Acquire() {
 	s.ch <- struct{}{}
 }
 
-// Release decrease counter until counter bigger than 0
+// Release releases one acquired permit.
 func (s *SemaphoreChan) Release() {
 	defer func() { <-s.ch }()
 }
 
+// Close closes the underlying channel.
+//
+// Cases:
+//   - Do not call Close while another goroutine can acquire or release a permit.
 func (s *SemaphoreChan) Close() {
 	close(s.ch)
 }
