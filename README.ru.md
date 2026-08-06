@@ -1,5 +1,8 @@
 # advsync
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/vitalick/adv-sync)](https://goreportcard.com/report/github.com/vitalick/adv-sync)
+[![GoDoc](https://godoc.org/github.com/vitalick/adv-sync?status.svg)](https://godoc.org/github.com/vitalick/adv-sync)
+
 [English version](README.md)
 
 `advsync` — небольшая Go-библиотека с синхронизационными примитивами по ключу.
