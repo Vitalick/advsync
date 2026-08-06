@@ -1,7 +1,7 @@
 # advsync
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/vitalick/adv-sync)](https://goreportcard.com/report/github.com/vitalick/adv-sync)
-[![GoDoc](https://godoc.org/github.com/vitalick/adv-sync?status.svg)](https://godoc.org/github.com/vitalick/adv-sync)
+[![Go Report Card](https://goreportcard.com/badge/github.com/vitalick/advsync)](https://goreportcard.com/report/github.com/vitalick/advsync)
+[![GoDoc](https://godoc.org/github.com/vitalick/advsync?status.svg)](https://godoc.org/github.com/vitalick/advsync)
 
 [Русская версия](README.ru.md)
 
