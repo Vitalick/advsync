@@ -11,4 +11,5 @@ formatters:
     - goimports
   settings:
     goimports:
-      local-prefixes: github.com/vitalick/advsync
+      local-prefixes:
+        - github.com/vitalick/advsync
